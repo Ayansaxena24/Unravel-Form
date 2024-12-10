@@ -34,7 +34,7 @@ const generateMockData = () => {
     });
   }
 
-  localStorage.setItem('emissions', JSON.stringify(mockData));
+  localStorage.setItem('emissions', JSON.stringify(mockData)); //setting data in local storage
 
   return mockData;
 };
@@ -68,10 +68,12 @@ const EmissionCounter = () => {
   const [tableFilterScope, setTableFilterScope] = useState('All');
   const [originalEntry, setOriginalEntry] = useState(null);
 
+  // Save emissions data to local storage as soon as the state changes
   useEffect(() => {
     localStorage.setItem('emissions', JSON.stringify(emissions));
-  }, [emissions]);
+  }, [emissions]); 
 
+  // Warning if stacked view is enabled for individual scopes
   useEffect(() => {
     if (isStacked && filterScope !== 'All')
         {
@@ -79,7 +81,8 @@ const EmissionCounter = () => {
             toast.warning("Stacked view is not supported for individual scopes. Switching to All Scopes.")
         }    
   }, [isStacked])
-
+  
+  // Load saved data from local storage as soon as the component mounts
   useEffect(() => {
     if (localStorage.getItem('isStacked') !== null) {
         const isStacked = localStorage.getItem('isStacked') === 'true';
@@ -129,6 +132,7 @@ const EmissionCounter = () => {
   };
   const monthlyEmissionsData = prepareMonthlyEmissionsData();
 
+  // Add new entry
   const addEmissionEntry = () => {
     const errors = {
         description: !newEntry.description,
@@ -152,6 +156,7 @@ const EmissionCounter = () => {
     resetNewEntry();
   };
 
+  // Reset new entry form
   const resetNewEntry = () => {
     setNewEntry({
       description: '',
@@ -203,6 +208,7 @@ const EmissionCounter = () => {
     setDeleteConfirmationOpen(true);
   };
 
+  // Confirm deletion of entry
   const confirmDeleteEntry = () => {
     if (entryToDelete) {
         setEmissions(prevEmissions => 
@@ -275,7 +281,7 @@ const EmissionCounter = () => {
     setAnchorEl(null);
   };
 
-  // Check if any field has changed
+  // Check if any field has changed in order to enable update button
   const hasEntryChanged = () => {
     if (!originalEntry || !editingEntry) return false;
 
@@ -314,6 +320,7 @@ const EmissionCounter = () => {
   const open = Boolean(anchorEl);
   const popoverId = open ? 'edit-popover' : undefined;
 
+  // Reset all data and Reload the page so that new data is fetched again
   const resetData = () => {
     localStorage.removeItem('emissions');
     localStorage.removeItem('barScope');
