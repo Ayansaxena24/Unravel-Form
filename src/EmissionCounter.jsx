@@ -66,6 +66,7 @@ const EmissionCounter = () => {
   const [deleteConfirmationOpen, setDeleteConfirmationOpen] = useState(false);
   const [entryToDelete, setEntryToDelete] = useState(null);
   const [tableFilterScope, setTableFilterScope] = useState('All');
+  const [originalEntry, setOriginalEntry] = useState(null);
 
   useEffect(() => {
     localStorage.setItem('emissions', JSON.stringify(emissions));
@@ -191,6 +192,7 @@ const EmissionCounter = () => {
     setEmissions(updatedEmissions);
     toast.success("Entry Updated")
     setEditingEntry(null);
+    setOriginalEntry(null);
     setAnchorEl(null);
   };
 
@@ -245,7 +247,7 @@ const EmissionCounter = () => {
   const paginatedEmissions = useMemo(() => {
     const startIndex = (currentPage - 1) * entriesPerPage;
     return filteredEmissions.slice(startIndex, startIndex + entriesPerPage);
-  }, [filteredEmissions, currentPage]);
+  }, [filteredEmissions, currentPage, entriesPerPage]);
 
   // Calculate total pages
   const totalPages = Math.ceil(filteredEmissions.length / entriesPerPage);
@@ -262,13 +264,28 @@ const EmissionCounter = () => {
   // Open popover for editing
   const handleEditOpen = (event, entry) => {
     setAnchorEl(event.currentTarget);
-    setEditingEntry({...entry});
+    const entryToEdit = {...entry};
+    setEditingEntry(entryToEdit);
+    setOriginalEntry(entry);
   };
 
   // Close popover
   const handleEditClose = () => {
     setEditingEntry(null);
     setAnchorEl(null);
+  };
+
+  // Check if any field has changed
+  const hasEntryChanged = () => {
+    if (!originalEntry || !editingEntry) return false;
+
+    return (
+      editingEntry.description !== originalEntry.description ||
+      editingEntry.scope !== originalEntry.scope ||
+      parseFloat(editingEntry.emission) !== originalEntry.emission ||
+      (editingEntry.date instanceof Date ? editingEntry.date : new Date(editingEntry.date)).getTime() !== 
+      (originalEntry.date instanceof Date ? originalEntry.date : new Date(originalEntry.date)).getTime()
+    );
   };
 
   // Calculate total emissions and this month's emissions
@@ -296,6 +313,16 @@ const EmissionCounter = () => {
 
   const open = Boolean(anchorEl);
   const popoverId = open ? 'edit-popover' : undefined;
+
+  const resetData = () => {
+    localStorage.removeItem('emissions');
+    localStorage.removeItem('barScope');
+    localStorage.removeItem('isStacked');
+    localStorage.removeItem('tableFilterScope');
+    localStorage.removeItem('entriesPerPage');
+    toast.success("Data Reset");
+    window.location.reload();
+  }
 
   return (
     <LocalizationProvider dateAdapter={AdapterDateFns}>
@@ -527,20 +554,20 @@ const EmissionCounter = () => {
           </div>
           <div className="h-[400px] w-full">
             <ResponsiveContainer width="100%" height="100%" minWidth="624px">
-              <BarChart data={monthlyEmissionsData} barSize={isStacked ? 50 : 14}>
+              <BarChart data={monthlyEmissionsData} barSize={isStacked ? 50 : 14} minWidth="624px">
                 <XAxis dataKey="month" />
                 <YAxis
                   label={{
                     value: "Total Absolute Emissions (t CO₂-e)",
                     angle: -90,
                     position: "insideLeft",
-                    offset: 20, // Reduced offset to move label away from values
+                    offset: 20, 
                     style: {
                       textAnchor: "middle",
                       fontSize: "20px",
                     },
                   }}
-                  width={120} // Explicitly set width to create more space
+                  width={120} 
                 />
                 <Tooltip />
                 <Legend />
@@ -601,9 +628,9 @@ const EmissionCounter = () => {
           }}
           className="bg-white shadow-md rounded-lg p-6"
         >
-          <div className="flex justify-between items-center mb-4">
+          <div className="flex justify-between items-center mb-4 sm:flex-row flex-col">
             <h2 className="text-xl font-semibold">Emissions List</h2>
-            <div className='flex justify-between space-x-4'>
+            <div className='flex justify-between space-x-4 sm:mt-0 mt-4'>
             <Select
               value={tableFilterScope}
               onChange={(e) => {
@@ -618,8 +645,7 @@ const EmissionCounter = () => {
               <MenuItem value="Scope 2">Scope 2</MenuItem>
               <MenuItem value="Scope 3">Scope 3</MenuItem>
             </Select>
-            {/* <div className='flex justify-center items-center space-x-2'>
-               <p>Rows per Page :</p>  */}
+            
             <FormControl fullWidth>
             <InputLabel>Rows per Page</InputLabel>    
             <Select
@@ -831,8 +857,9 @@ const EmissionCounter = () => {
                 />
                 <div className="flex space-x-2">
                   <button
+                  disabled={!hasEntryChanged()}
                     onClick={updateEmissionEntry}
-                    className="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 flex-1"
+                    className={`px-4 py-2 text-white rounded-md flex-1 ${!hasEntryChanged() ? 'bg-gray-400' : 'bg-blue-500 hover:bg-blue-600'}`}
                   >
                     Update
                   </button>
@@ -848,6 +875,8 @@ const EmissionCounter = () => {
           </Popover>
 
           {/* Simplified Pagination */}
+          <div className='flex justify-between items-center w-[95%] flex-col sm:flex-row'>
+            <div></div>
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -879,6 +908,17 @@ const EmissionCounter = () => {
             </motion.button>
             <ToastContainer />
           </motion.div>
+          <div>
+          <motion.button
+              whileHover={{ scale: 1.1 }}
+              whileTap={{ scale: 0.9 }}
+              onClick={resetData}
+              className="px-4 py-2 bg-gray-200 text-gray-800 rounded mt-4"
+            >
+              Reset Data
+            </motion.button>
+          </div>
+          </div>
         </motion.div>
       </motion.div>
     </LocalizationProvider>
