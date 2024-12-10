@@ -76,7 +76,7 @@ const EmissionCounter = () => {
     if (isStacked && filterScope !== 'All')
         {
             setFilterScope('All')
-            toast.error("Stacked view is not supported for individual scopes. Switching to All Scopes.")
+            toast.warning("Stacked view is not supported for individual scopes. Switching to All Scopes.")
         }    
   }, [isStacked])
 
@@ -522,7 +522,7 @@ const EmissionCounter = () => {
                     if (isStacked && e.target.value !== 'All') 
                         {
                             setFilterScope('All')
-                            toast.error("Stacked view is not supported for individual scopes. Switching to All Scopes.")
+                            toast.warning("Stacked view is not supported for individual scopes. Switching to All Scopes.")
                             return;
                         }
                   setFilterScope(e.target.value);
