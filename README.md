@@ -47,6 +47,7 @@ This React application allows users to manage and track carbon emissions for bus
 ### 4. **Mock API Integration**
 - CRUD operations mimic real API endpoints.
 - Data is stored in Local Storage, and is retrieved from the Local Storage as soon as the component mounts.
+- A varying mockdata of 10000 rows is readily available as soon as the app is started.
 
   ![LocalStorage](https://github.com/user-attachments/assets/425fca15-2bf0-47f0-9fae-96c06ef7fc69)
 
