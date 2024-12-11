@@ -237,17 +237,17 @@ const EmissionCounter = () => {
 
   // Filtered emissions based on scope for chart and table
   const filteredEmissions = useMemo(() => {
-    let baseFilteredEmissions = filterScope === 'All' 
+    let baseFilteredEmissions = tableFilterScope === 'All' 
       ? emissions 
-      : emissions.filter(entry => entry.scope === filterScope);
+      : emissions.filter(entry => entry.scope === tableFilterScope);
     
     // Apply additional table filter if different from chart filter
-    if (tableFilterScope !== 'All') {
-      baseFilteredEmissions = baseFilteredEmissions.filter(entry => entry.scope === tableFilterScope);
-    }
+    // if (tableFilterScope !== 'All') {
+    //   baseFilteredEmissions = baseFilteredEmissions.filter(entry => entry.scope === tableFilterScope);
+    // }
     
     return baseFilteredEmissions;
-  }, [emissions, filterScope, tableFilterScope]);
+  }, [emissions, tableFilterScope]);
 
   // Paginated emissions
   const paginatedEmissions = useMemo(() => {
